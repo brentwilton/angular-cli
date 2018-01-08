@@ -74,7 +74,15 @@ export function makeTransform(
           return modifiedNodes;
         } else {
           // Otherwise return node as is and visit children.
-          return visitEachChild(node, visitor, context);
+          let visitedNode = visitEachChild(node, visitor, context);
+          if (visitedNode.kind === 149) { // PropertyDeclaration
+            // If the child node decorators were modified then the child node is re-created missing the original parent.
+            // Set the parent on the modified visitedNode to avoid 'kind' is undefined error during emit.
+            if (node.decorators !== visitedNode.decorators && !visitedNode.parent) {
+              visitedNode.parent = node.parent;
+            }
+          }
+          return visitedNode;
         }
       };
 
